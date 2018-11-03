@@ -39,6 +39,8 @@ var settingsData = {
   leftMouseEvents: remote.getGlobal('leftMouseEvents'),
   showTotalWinLossCounter: remote.getGlobal('showTotalWinLossCounter'),
   showDeckWinLossCounter: remote.getGlobal('showDeckWinLossCounter'),
+  winLossObj: remote.getGlobal('winLossCounter'),
+  counterDeckList: [],
   lastCollection: remote.getGlobal('lastCollection'),
   lastVaultProgress: remote.getGlobal('lastVaultProgress'),
   showVaultProgress: remote.getGlobal('showVaultProgress'),
@@ -66,6 +68,21 @@ var settingsData = {
     help: "This method sorts cards by card type, then by cost, then by name."}
   ],
 }
+
+/*
+  Attempt to get up-to-date winLossCounter info to show all toggles
+
+  calling remote.getGlobal('winLossCounter') gets stale info
+
+  tried hack of passing value at time of change - also stale
+*/
+ipcRenderer.on('settingsChanged', (e,wlc,now) => {
+console.log('got here settingsChanged')
+console.log(remote.getGlobal('winLossCounter'));
+console.log(wlc);
+console.log(now);
+  settingsData.winLossObj = wlc;
+});
 
 let commitFile = "version_commit.txt"
 let buildFile = "version_build.txt"
@@ -196,7 +213,7 @@ rivets.binders.recentcardsbinder = (el, cardsObtained) => {
 }
 
 function recentCardsSectionClickHandler(event) {
-  var revealed = $(event.target).siblings(".recent-cards-container").is(":hidden"); 
+  var revealed = $(event.target).siblings(".recent-cards-container").is(":hidden");
   if(revealed) {
     $(event.target).siblings(".recent-cards-container").slideDown("fast");
   } else {
@@ -204,6 +221,19 @@ function recentCardsSectionClickHandler(event) {
   }
 }
 
+/*function counterDecks(){
+  let decks = [];
+//console.log(settingsData);
+  let wlo = settingsData.winLossObj;
+  let ids = Object.keys(wlo);
+  for (let x=0;x<ids.length;x++){
+    if (ids[x] == 'total' || ids[x] == 'win' || ids[x] == 'loss') {
+      continue;
+    }
+    decks.push({'id':ids[x],'name': settingsData.winLossObj[ids[x]]['name']});
+  }
+  return decks;
+}*/
 
 document.addEventListener("DOMContentLoaded", function(event) {
   rivets.bind(document.getElementById('container'), settingsData)

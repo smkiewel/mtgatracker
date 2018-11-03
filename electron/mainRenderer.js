@@ -622,7 +622,7 @@ function populateDeck(elem) {
     }
     appData.deckWinCounter = appData.winLossObj[appData.activeDeck].win;
     appData.deckLossCounter = appData.winLossObj[appData.activeDeck].loss;
-    
+
     resizeWindow()
 }
 
@@ -1003,7 +1003,7 @@ let onMessage = (data) => {
                         if(isNaN(cardQuantity)) {
                           cardQuantity = data.collection[cardID];
                         }
-                        if(cardQuantity > 0) { 
+                        if(cardQuantity > 0) {
                           objectToPush.cardsObtained[cardID] = cardQuantity;
                         }
                       }
@@ -1142,7 +1142,14 @@ ipcRenderer.on('updateReadyToInstall', (messageInfo) => {
   addMessage("A new tracker update will be applied on next launch!", "https://github.com/shawkinsl/mtga-tracker/releases/latest")
 })
 
-ipcRenderer.on('settingsChanged', () => {
+/*
+  Hack in args to pass current state and time of sending settingsChanged in main.js
+  For getting more info to compare with settingsRenderer.js
+  */
+ipcRenderer.on('settingsChanged', (e,wlo,now) => {
+console.log(wlo);
+console.log(now);
+
   debug = remote.getGlobal('debug');
   appData.debug = debug
 
@@ -1192,8 +1199,9 @@ ipcRenderer.on('settingsChanged', () => {
 
   recentCards = remote.getGlobal('recentCards');
   appData.recentCards = recentCards
-
+console.log('getting remote');
   winLossCounter = remote.getGlobal('winLossCounter');
+console.log(winLossCounter);
   appData.totalWinCounter = winLossCounter['total'].win;
   appData.totalLossCounter = winLossCounter['total'].loss;
   if (appData.activeDeck == 'total'){
@@ -1203,8 +1211,11 @@ ipcRenderer.on('settingsChanged', () => {
     appData.deckWinCounter = winLossCounter[appData.activeDeck].win;
     appData.deckLossCounter = winLossCounter[appData.activeDeck].loss;
   }
-
+console.log('before setting data');
+console.log(appData.winLossObj)
   appData.winLossObj = winLossCounter
+console.log('after setting data');
+console.log(appData.winLossObj)
 
   let useTheme = remote.getGlobal("useTheme")
   let themeFile = remote.getGlobal("themeFile")

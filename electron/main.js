@@ -224,10 +224,9 @@ let debugCmdOpt = getBooleanArg('-d', '--debug')
 let frameCmdOpt = getBooleanArg('-uf', '--use_framed')
 let fullFileCmdOpt = getBooleanArg('-f', '--full_file')
 
-//if (debugCmdOpt) {
-//  settings.set('debug', true)
-//}
-settings.set('debug', false)
+if (debugCmdOpt) {
+  settings.set('debug', true)
+}
 
 if (frameCmdOpt) {
   settings.set('useFrame', true)
@@ -288,6 +287,8 @@ if (fullFileCmdOpt) {
   readFullFile = true;
 }
 
+var postSettingsChanged = false;
+
 ipcMain.on('messageAcknowledged', (event, arg) => {
   let acked = settings.get("messagesAcknowledged", [])
   acked.push(arg)
@@ -298,7 +299,22 @@ ipcMain.on('messageAcknowledged', (event, arg) => {
 ipcMain.on('settingsChanged', (event, arg) => {
   global[arg.key] = arg.value;
   settings.set(arg.key, arg.value)
-  mainWindow.webContents.send('settingsChanged')
+//extra info for testing
+//current state of winLossCounter
+// !!!! Always stale!!!!
+let now = new Date();
+let counter = global.winLossCounter;
+  mainWindow.webContents.send('settingsChanged', counter, now)
+
+  //if settings window is active
+  //  send settingsChanged
+  // else
+  //   save for posting later (when the dialog is shown)
+  if (settingsWindow != null){
+    settingsWindow.webContents.send('settingsChanged', counter, now);
+  } else {
+    postSettingsChanged = true;
+  }
 })
 
 ipcMain.on('hideRequest', (event, arg) => {
@@ -374,6 +390,11 @@ let openSettingsWindow = () => {
     })
   }
   settingsWindow.once('ready-to-show', () => {
+    //if pending settings to post to settings window
+    if (postSettingsChanged) {
+      settingsWindow.webContents.send('settingsChanged',new Date(),global.winLossCounter);
+      postSettingsChanged = false;
+    }
     settingsWindow.show()
   })
 }
