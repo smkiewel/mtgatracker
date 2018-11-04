@@ -69,18 +69,8 @@ var settingsData = {
   ],
 }
 
-/*
-  Attempt to get up-to-date winLossCounter info to show all toggles
-
-  calling remote.getGlobal('winLossCounter') gets stale info
-
-  tried hack of passing value at time of change - also stale
-*/
-ipcRenderer.on('counterChanged', (e,k,v) => {
-console.log(k);
-console.log(v);
-  settingsData.winLossObj = remote.getGlobal('winLossCounter');
-console.log(settingsData.winLossObj)
+ipcRenderer.on('counterChanged', (e,new_wlc) => {
+  settingsData.winLossObj = new_wlc;
 });
 
 let commitFile = "version_commit.txt"

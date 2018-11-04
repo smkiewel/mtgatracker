@@ -287,7 +287,7 @@ if (fullFileCmdOpt) {
   readFullFile = true;
 }
 
-var postSettingsChanged = false;
+var postCounterChanged = false;
 
 ipcMain.on('messageAcknowledged', (event, arg) => {
   let acked = settings.get("messagesAcknowledged", [])
@@ -305,9 +305,10 @@ ipcMain.on('settingsChanged', (event, arg) => {
 ipcMain.on('updateWinLossCounter', (e,arg) => {
   global['winLossCounter'][arg.key] = arg.value;
   settings.set('winLossCounter.' + arg.key, arg.value)
-  mainWindow.webContents.send('settingsChanged')
   if (settingsWindow != null){
-    settingsWindow.webContents.send('counterChanged',arg.key,arg.value);
+    settingsWindow.webContents.send('counterChanged',global['winLossCounter']);
+  } else {
+    postCounterChanged = true;
   }
 })
 
@@ -385,9 +386,9 @@ let openSettingsWindow = () => {
   }
   settingsWindow.once('ready-to-show', () => {
     //if pending settings to post to settings window
-    if (postSettingsChanged) {
-      settingsWindow.webContents.send('settingsChanged',new Date(),global.winLossCounter);
-      postSettingsChanged = false;
+    if (postCounterChanged) {
+      settingsWindow.webContents.send('countereChanged',global.winLossCounter);
+      postCounterChanged = false;
     }
     settingsWindow.show()
   })
