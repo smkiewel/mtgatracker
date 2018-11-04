@@ -76,12 +76,11 @@ var settingsData = {
 
   tried hack of passing value at time of change - also stale
 */
-ipcRenderer.on('settingsChanged', (e,wlc,now) => {
-console.log('got here settingsChanged')
-console.log(remote.getGlobal('winLossCounter'));
-console.log(wlc);
-console.log(now);
-  settingsData.winLossObj = wlc;
+ipcRenderer.on('counterChanged', (e,k,v) => {
+console.log(k);
+console.log(v);
+  settingsData.winLossObj = remote.getGlobal('winLossCounter');
+console.log(settingsData.winLossObj)
 });
 
 let commitFile = "version_commit.txt"

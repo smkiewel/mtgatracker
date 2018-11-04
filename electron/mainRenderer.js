@@ -757,8 +757,8 @@ function uploadGame(attempt, gameData, errors) {
     } else {
       appData.winLossObj.total.loss++
     }
-    ipcRenderer.send('settingsChanged', {
-      key: "winLossCounter.total",
+    ipcRenderer.send('updateWinLossCounter', {
+      key: "total",
       value: {win: appData.winLossObj.total.win, loss: appData.winLossObj.total.loss}
     })
     //only update per-deck win/loss for decks we know about
@@ -777,8 +777,8 @@ function uploadGame(attempt, gameData, errors) {
           appData.winLossObj[deckID] = {win: 0, loss: 1, name: gameData.players[0].deck.pool_name}
         }
       }
-      ipcRenderer.send('settingsChanged', {
-        key: `winLossCounter.${gameData.players[0].deck.deckID}`,
+      ipcRenderer.send('updateWinLossCounter', {
+        key: deckID,
         value: appData.winLossObj[deckID]
       })
     }
@@ -1146,10 +1146,7 @@ ipcRenderer.on('updateReadyToInstall', (messageInfo) => {
   Hack in args to pass current state and time of sending settingsChanged in main.js
   For getting more info to compare with settingsRenderer.js
   */
-ipcRenderer.on('settingsChanged', (e,wlo,now) => {
-console.log(wlo);
-console.log(now);
-
+ipcRenderer.on('settingsChanged', () => {
   debug = remote.getGlobal('debug');
   appData.debug = debug
 
