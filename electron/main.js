@@ -299,21 +299,15 @@ ipcMain.on('messageAcknowledged', (event, arg) => {
 ipcMain.on('settingsChanged', (event, arg) => {
   global[arg.key] = arg.value;
   settings.set(arg.key, arg.value)
-//extra info for testing
-//current state of winLossCounter
-// !!!! Always stale!!!!
-let now = new Date();
-let counter = global.winLossCounter;
-  mainWindow.webContents.send('settingsChanged', counter, now)
+  mainWindow.webContents.send('settingsChanged')
+})
 
-  //if settings window is active
-  //  send settingsChanged
-  // else
-  //   save for posting later (when the dialog is shown)
+ipcMain.on('updateWinLossCounter', (e,arg) => {
+  global['winLossCounter'][arg.key] = arg.value;
+  settings.set('winLossCounter.' + arg.key, arg.value)
+  mainWindow.webContents.send('settingsChanged')
   if (settingsWindow != null){
-    settingsWindow.webContents.send('settingsChanged', counter, now);
-  } else {
-    postSettingsChanged = true;
+    settingsWindow.webContents.send('counterChanged',arg.key,arg.value);
   }
 })
 
